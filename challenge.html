@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Calculator - Time Left to Die</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #ffffff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #897c7c, #d6d1cf);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .photo-upload {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .photo-upload:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #f40606, #000000);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .result-container {
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ff6b6b;
+        }
+
+        .photos-container {
+            margin-top: 40px;
+            position: relative;
+            height: 300px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .photo {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.8s ease-in-out;
+        }
+
+        .photo-left {
+            left: 40px;
+            top: 70px;
+            border-radius: 50%;
+        }
+
+        .photo-right {
+            right: 50px;
+            top: 90px;
+            border-radius: 50%;
+        }
+
+        .photo-rectangle {
+            border-radius: 15px !important;
+        }
+
+        .photo-transparent {
+            opacity: 0.7;
+        }
+
+        .distance-line {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, #ff0606, #000000);
+            top: 150px;
+            left: 50px;
+            right: 50px;
+            border-radius: 2px;
+            transition: all 0.8s ease-in-out;
+        }
+
+        .low-distance {
+            left: 50px;
+            right: 50px;
+        }
+
+        .medium-distance {
+            left: 100px;
+            right: 100px;
+        }
+
+        .high-distance {
+            left: 150px;
+            right: 150px;
+        }
+
+        .result-message {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> Life Calculator</h1>
+            <p>Calculate your time left to die based on your lifestyle choices</p>
+        </div>
+
+        <div class="form-container">
+            <form id="lifeForm">
+                <div class="form-group">
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="photo">Upload Photo:</label>
+                    <div class="photo-upload" onclick="document.getElementById('photo').click()">
+                        <div class="upload-icon">📷</div>
+                        <p>Click to upload photo</p>
+                        <input type="file" id="photo" name="photo" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="locality">Locality/City:</label>
+                    <input type="text" id="locality" name="locality" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" min="1" max="120" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="favoriteFood">Favorite Food Item:</label>
+                    <select id="favoriteFood" name="favoriteFood" required>
+                        <option value="">Select your favorite food</option>
+                        <option value="pizza">Pizza</option>
+                        <option value="burger">Burger</option>
+                        <option value="sushi">Sushi</option>
+                        <option value="pasta">Pasta</option>
+                        <option value="salad">Salad</option>
+                        <option value="steak">Steak</option>
+                        <option value="chicken">Chicken</option>
+                        <option value="fish">Fish</option>
+                        <option value="vegetables">Vegetables</option>
+                        <option value="dessert">Dessert</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn">Calculate Time Left to Die</button>
+            </form>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <h2>Your Life Calculation Results</h2>
+            <div class="result-value" id="resultValue">0</div>
+            <div class="result-message" id="resultMessage"></div>
+            
+            <div class="photos-container">
+                <img src="https://via.placeholder.com/120x120/667eea/ffffff?text=Photo+1" alt="Photo 1" class="photo photo-left" id="photoLeft">
+                <img src="https://ih1.redbubble.net/image.1165591165.5850/st,small,507x507-pad,600x600,f8f8f8.jpg" alt="Photo 2" class="photo photo-right" id="photoRight">
+                <div class="distance-line" id="distanceLine"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('lifeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateTimeLeft();
+        });
+
+        function calculateTimeLeft() {
+            const name = document.getElementById('name').value;
+            const age = parseInt(document.getElementById('age').value);
+            const locality = document.getElementById('locality').value;
+            const favoriteFood = document.getElementById('favoriteFood').value;
+            const gender = document.getElementById('gender').value;
+
+            // Complex calculation algorithm based on age, locality, and favorite food
+            let baseYears = 3; // Base life expectancy
+            
+            // Age factor (younger people have more years)
+            let ageFactor = Math.max(0, (100 - age) / 100);
+            
+            // Locality factor (random but consistent for same locality)
+            let localityHash = locality.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+            let localityFactor = (localityHash % 20 - 10) / 100; // -0.1 to 0.1
+            
+            // Food factor (healthier foods add years)
+            const foodFactors = {
+                'salad': 0.15,
+                'vegetables': 0.12,
+                'fish': 0.10,
+                'chicken': 0.08,
+                'sushi': 0.05,
+                'pasta': 0.02,
+                'pizza': -0.10,
+                'burger': -0.28,
+                'steak': -0.43,
+                'dessert': -0.90
+            };
+            
+            let foodFactor = foodFactors[favoriteFood] || 0;
+            
+            // Gender factor
+            let genderFactor = gender === 'female' ? 0.05 : 0;
+            
+            // Calculate final years
+            let yearsLeft = baseYears * (1 + ageFactor + localityFactor + foodFactor + genderFactor);
+            yearsLeft = Math.max(0, Math.round(yearsLeft * 10) / 10); // Round to 1 decimal
+            
+            // Display result
+            document.getElementById('resultValue').textContent = yearsLeft + ' years';
+            
+            // Set result message
+            let message = '';
+            if (yearsLeft > 3) {
+                message = 'Excellent! You have a long and healthy life ahead! 🎉';
+            } else if (yearsLeft > 2) {
+                message = 'Good! You have a decent amount of time left. 🌟';
+            } else if (yearsLeft > 1) {
+                message = 'Moderate life expectancy. Consider lifestyle changes. ⚠️';
+            } else {
+                message = 'Low life expectancy. Please consult a healthcare professional. 🚨';
+            }
+            document.getElementById('resultMessage').textContent = message;
+            
+            // Show result container
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            // Adjust photo distances based on calculated value
+            adjustPhotoDistances(yearsLeft);
+        }
+
+        function adjustPhotoDistances(yearsLeft) {
+            const photoLeft = document.getElementById('photoLeft');
+            const photoRight = document.getElementById('photoRight');
+            const distanceLine = document.getElementById('distanceLine');
+            
+            // Remove existing classes
+            distanceLine.classList.remove('low-distance', 'medium-distance', 'high-distance');
+            photoLeft.classList.remove('photo-transparent');
+            photoRight.classList.remove('photo-rectangle');
+            
+            // Determine distance based on calculated value
+            if (yearsLeft < 1.5) {
+                // Low value - photos overlap (bad outcome)
+                photoLeft.style.left = '290px';
+                photoRight.style.left = '290px';
+                photoRight.classList.add('photo-transparent');
+                photoRight.classList.add('photo-rectangle');
+                distanceLine.classList.add('low-distance');
+            } else if (yearsLeft < 3) {
+                // Medium value - medium distance
+                photoLeft.style.left = '100px';
+                photoRight.style.right = '100px';
+                distanceLine.classList.add('medium-distance');
+            } else {
+                // High value - photos close together (good outcome)
+                photoLeft.style.left = '50px';
+                photoRight.style.right = '50px';
+                distanceLine.classList.add('high-distance');
+            }
+        }
+
+        // Handle photo upload preview
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Display uploaded photo as Photo1 (left photo)
+                    document.getElementById('photoLeft').src = e.target.result;
+                    
+                    // Also update the upload area to show a preview
+                    const uploadArea = document.querySelector('.photo-upload');
+                    uploadArea.innerHTML = `
+                        <img src="${e.target.result}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
+                        <p>Photo uploaded successfully!</p>
+                        <small>Click to change photo</small>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
