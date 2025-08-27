@@ -140,52 +140,37 @@
             border: 4px solid white;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             transition: all 0.8s ease-in-out;
+            z-index: 1;
         }
 
-        .photo-left {
-            left: 40px;
-            top: 70px;
-            border-radius: 50%;
+        /* .photo-left {
+            left: 50px;
+            top: 90px;
+            border-radius: 12px;
         }
 
         .photo-right {
             right: 50px;
             top: 90px;
-            border-radius: 0%;
-        }
-
+            border-radius: 12px;
+        } */
+/* 
         .photo-rectangle {
             border-radius: 15px !important;
-        }
+        } */
 
         .photo-transparent {
             opacity: 0.7;
         }
 
-        .distance-line {
-            position: absolute;
-            height: 4px;
-            background: linear-gradient(90deg, #ff0606, #000000);
-            top: 150px;
-            left: 50px;
-            right: 50px;
-            border-radius: 2px;
-            transition: all 0.8s ease-in-out;
+        .photo-inside {
+            width: 90px !important;
+            height: 90px !important;
+            transform: rotate(-12deg) scale(0.95);
         }
 
-        .low-distance {
-            left: 50px;
-            right: 50px;
-        }
-
-        .medium-distance {
-            left: 100px;
-            right: 100px;
-        }
-
-        .high-distance {
-            left: 150px;
-            right: 150px;
+        .on-top {
+            z-index: 3 !important;
         }
 
         .result-message {
@@ -245,20 +230,21 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="favoriteFood">Favorite Food Item:</label>
-                    <select id="favoriteFood" name="favoriteFood" required>
-                        <option value="">Select your favorite food</option>
-                        <option value="pizza">Pizza</option>
-                        <option value="burger">Burger</option>
-                        <option value="sushi">Sushi</option>
-                        <option value="pasta">Pasta</option>
-                        <option value="salad">Salad</option>
-                        <option value="steak">Steak</option>
-                        <option value="chicken">Chicken</option>
-                        <option value="fish">Fish</option>
-                        <option value="vegetables">Vegetables</option>
-                        <option value="dessert">Dessert</option>
-                    </select>
+                    <label>Choose 4-5 Food Items:</label>
+                    <div id="foodChoices" style="display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; align-items:center;">
+                        <label><input type="checkbox" name="food" value="pizza"> Pizza</label>
+                        <label><input type="checkbox" name="food" value="burger"> Burger</label>
+                        <label><input type="checkbox" name="food" value="sushi"> Sushi</label>
+                        <label><input type="checkbox" name="food" value="pasta"> Pasta</label>
+                        <label><input type="checkbox" name="food" value="salad"> Salad</label>
+                        <label><input type="checkbox" name="food" value="steak"> Steak</label>
+                        <label><input type="checkbox" name="food" value="chicken"> Chicken</label>
+                        <label><input type="checkbox" name="food" value="fish"> Fish</label>
+                        <label><input type="checkbox" name="food" value="vegetables"> Vegetables</label>
+                        <label><input type="checkbox" name="food" value="dessert"> Dessert</label>
+                       
+                    </div>
+                    <small>Select between 4 and 5 items.</small>
                 </div>
 
                 <button type="submit" class="submit-btn">Calculate Time Left to Die</button>
@@ -273,7 +259,6 @@
             <div class="photos-container">
                 <img src="https://via.placeholder.com/120x120/667eea/ffffff?text=Photo+1" alt="Photo 1" class="photo photo-left" id="photoLeft">
                 <img src="https://ih1.redbubble.net/image.1165591165.5850/st,small,507x507-pad,600x600,f8f8f8.jpg" alt="Photo 2" class="photo photo-right" id="photoRight">
-                <div class="distance-line" id="distanceLine"></div>
             </div>
         </div>
     </div>
@@ -287,94 +272,147 @@
         function calculateTimeLeft() {
             const name = document.getElementById('name').value;
             const age = parseInt(document.getElementById('age').value);
-            const locality = document.getElementById('locality').value;
-            const favoriteFood = document.getElementById('favoriteFood').value;
+            const locality = document.getElementById('locality').value.trim();
+            const selectedFoods = Array.from(document.querySelectorAll('#foodChoices input[name="food"]:checked')).map(i => i.value);
             const gender = document.getElementById('gender').value;
 
-            // Complex calculation algorithm based on age, locality, and favorite food
-            let baseYears = 3; // Base life expectancy
-            
-            // Age factor (younger people have more years)
-            let ageFactor = Math.max(0, (100 - age) / 100);
-            
-            // Locality factor (random but consistent for same locality)
-            let localityHash = locality.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
-            let localityFactor = (localityHash % 20 - 10) / 100; // -0.1 to 0.1
-            
-            // Food factor (healthier foods add years)
-            const foodFactors = {
-                'salad': 0.15,
-                'vegetables': 0.12,
-                'fish': 0.10,
-                'chicken': 0.08,
-                'sushi': 0.05,
-                'pasta': 0.02,
-                'pizza': -0.10,
-                'burger': -0.28,
-                'steak': -0.43,
-                'dessert': -0.90
-            };
-            
-            let foodFactor = foodFactors[favoriteFood] || 0;
-            
-            // Gender factor
-            let genderFactor = gender === 'female' ? 0.05 : 0;
-            
-            // Calculate final years
-            let yearsLeft = baseYears * (1 + ageFactor + localityFactor + foodFactor + genderFactor);
-            yearsLeft = Math.max(0, Math.round(yearsLeft * 10) / 10); // Round to 1 decimal
-            
-            // Display result
-            document.getElementById('resultValue').textContent = yearsLeft + ' years';
-            
-            // Set result message
-            let message = '';
-            if (yearsLeft > 3) {
-                message = 'Excellent! You have a long and healthy life ahead! 🎉';
-            } else if (yearsLeft > 2) {
-                message = 'Good! You have a decent amount of time left. 🌟';
-            } else if (yearsLeft > 1) {
-                message = 'Moderate life expectancy. Consider lifestyle changes. ⚠️';
-            } else {
-                message = 'Low life expectancy. Please consult a healthcare professional. 🚨';
+            // Validate food selection count: must choose 4-5
+            if (selectedFoods.length < 4 || selectedFoods.length > 5) {
+                alert('Please select between 4 and 5 food items.');
+                return;
             }
+
+            // New scoring system: 0 (worst) to 100 (best)
+            // Start at 50 and adjust
+            let score = 50;
+
+            // Age: penalize older ages, bonus for very young adults
+            if (!isNaN(age)) {
+                score -= Math.max(0, (age - 30) * 0.6); // subtract 0.6 per year over 30
+                score += Math.max(0, (30 - age) * 0.1); // small bonus if below 30
+            }
+
+            // Locality: deterministic hash for small variation -5..+5
+            const hash = locality.split('').reduce((s, ch) => s + ch.charCodeAt(0), 0);
+            score += (hash % 11) - 5;
+
+            // Foods: hidden toxic and energy values per item
+            const foodMeta = {
+                pizza:        { toxic: 22, energy: 18 },
+                burger:       { toxic: 24, energy: 16 },
+                sushi:        { toxic: 6,  energy: 14 },
+                pasta:        { toxic: 10, energy: 12 },
+                salad:        { toxic: 2,  energy: 18 },
+                steak:        { toxic: 8,  energy: 10 },
+                chicken:      { toxic: 7,  energy: 12 },
+                fish:         { toxic: 4,  energy: 20 },
+                vegetables:   { toxic: 1,  energy: 16 },
+                dessert:      { toxic: 20, energy: 8  }
+                
+            };
+            // Compute average net impact of chosen foods
+            const impacts = selectedFoods.map(key => {
+                const meta = foodMeta[key] || { toxic: 10, energy: 10 };
+                return meta.energy - meta.toxic; // can be negative or positive
+            });
+            const avgImpact = impacts.reduce((a, b) => a + b, 0) / impacts.length;
+            // Scale food impact to score contribution (~ -20..+20)
+            score += Math.max(-20, Math.min(20, Math.round(avgImpact)));
+
+            // Gender: tiny nudge
+            if (gender === 'female') score += 2;
+
+            // Clamp 0..100
+            score = Math.max(0, Math.min(100, Math.round(score)));
+
+            // Derive an easy-to-read value (still called years for UI)
+            // Map score 0..100 -> 0.0..6.0
+            const yearsLeft = Math.round((score / 100) * 60) / 10; // one decimal
+
+            // Display
+            document.getElementById('resultValue').textContent = yearsLeft + ' years';
+
+            // Message by score tiers (Critical, Moderate, Good, Excellent)
+            let message = '';
+            if (score >= 86) message = 'Excellent! You have a long and healthy life ahead! 🎉';
+            else if (score >= 61) message = 'Good. You have a decent amount of time left. 🌟';
+            else if (score >= 26) message = 'Moderate. Consider lifestyle improvements. ⚠️';
+            else message = 'Critical. Please consult a healthcare professional. 🚨';
             document.getElementById('resultMessage').textContent = message;
-            
-            // Show result container
+
+            // Show visuals
             document.getElementById('resultContainer').style.display = 'block';
-            
-            // Adjust photo distances based on calculated value
-            adjustPhotoDistances(yearsLeft);
+
+            // Move photos based on score
+            adjustPhotoDistances(score);
         }
 
-        function adjustPhotoDistances(yearsLeft) {
+        function adjustPhotoDistances(score) {
             const photoLeft = document.getElementById('photoLeft');
             const photoRight = document.getElementById('photoRight');
-            const distanceLine = document.getElementById('distanceLine');
-            
-            // Remove existing classes
-            distanceLine.classList.remove('low-distance', 'medium-distance', 'high-distance');
-            photoLeft.classList.remove('photo-transparent');
-            photoRight.classList.remove('photo-rectangle');
-            
-            // Determine distance based on calculated value
-            if (yearsLeft < 1.5) {
-                // Low value - photos overlap (bad outcome)
-                photoLeft.style.left = '290px';
-                photoRight.style.left = '290px';
+            const container = photoLeft.parentElement;
+
+            // Reset classes
+            photoLeft.classList.remove('photo-transparent', 'photo-rectangle', 'photo-inside', 'on-top');
+            photoRight.classList.remove('photo-transparent', 'photo-rectangle', 'photo-inside', 'on-top');
+
+            // Both are rectangular now by default
+            photoLeft.classList.add('photo-rectangle');
+            photoRight.classList.add('photo-rectangle');
+
+            // Helper to clear opposing sides before setting
+            const setLeftRight = (leftPos, rightPos) => {
+                if (leftPos !== null) {
+                    photoLeft.style.left = leftPos + 'px';
+                }
+                if (rightPos !== null) {
+                    photoRight.style.right = rightPos + 'px';
+                    photoRight.style.left = '';
+                } else {
+                    photoRight.style.right = '';
+                }
+            };
+
+            // Very fine-grained tiers for smoother movement
+            if (score < 15) {
+                // Extreme critical: complete overlap, photo1 lies inside photo2 at exact center
+                const centerX = (container.clientWidth - 120) / 2;
+                photoLeft.style.left = centerX + 'px';
+                photoRight.style.left = centerX + 'px';
+                photoRight.style.right = '';
                 photoRight.classList.add('photo-transparent');
-                photoRight.classList.add('photo-rectangle');
-                distanceLine.classList.add('low-distance');
-            } else if (yearsLeft < 3) {
-                // Medium value - medium distance
-                photoLeft.style.left = '100px';
-                photoRight.style.right = '100px';
-                distanceLine.classList.add('medium-distance');
+                photoLeft.classList.add('photo-inside', 'on-top');
+            } else if (score < 26) {
+                // Critical: slight offset overlap
+                const centerX = (container.clientWidth - 120) / 2;
+                photoLeft.style.left = (centerX - 10) + 'px';
+                photoRight.style.left = (centerX + 10) + 'px';
+                photoRight.style.right = '';
+                photoRight.classList.add('photo-transparent');
+            } else if (score < 36) {
+                // Very small separation
+                setLeftRight(170, 170);
+            } else if (score < 46) {
+                // Small separation
+                setLeftRight(150, 150);
+            } else if (score < 56) {
+                // Moderate separation
+                setLeftRight(130, 130);
+            } else if (score < 66) {
+                // Medium separation
+                setLeftRight(110, 110);
+            } else if (score < 76) {
+                // Medium-large separation
+                setLeftRight(90, 90);
+            } else if (score < 86) {
+                // Large separation
+                setLeftRight(70, 70);
+            } else if (score < 96) {
+                // Very large separation
+                setLeftRight(55, 55);
             } else {
-                // High value - photos close together (good outcome)
-                photoLeft.style.left = '50px';
-                photoRight.style.right = '50px';
-                distanceLine.classList.add('high-distance');
+                // Maximum separation
+                setLeftRight(40, 40);
             }
         }
 
