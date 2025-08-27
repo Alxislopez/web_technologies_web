@@ -257,7 +257,7 @@
             <div class="result-message" id="resultMessage"></div>
             
             <div class="photos-container">
-                <img src="https://via.placeholder.com/120x120/667eea/ffffff?text=Photo+1" alt="Photo 1" class="photo photo-left" id="photoLeft">
+                <img src="download.png" alt="Photo 1" class="photo photo-left" id="photoLeft">
                 <img src="https://ih1.redbubble.net/image.1165591165.5850/st,small,507x507-pad,600x600,f8f8f8.jpg" alt="Photo 2" class="photo photo-right" id="photoRight">
             </div>
         </div>
@@ -331,6 +331,16 @@
 
             // Display
             document.getElementById('resultValue').textContent = yearsLeft + ' years';
+
+            // Set default Photo1 based on gender if user hasn't uploaded
+            const photoLeftEl = document.getElementById('photoLeft');
+            const currentSrc = photoLeftEl.getAttribute('data-user-uploaded') === 'true' ? photoLeftEl.src : '';
+            if (!currentSrc) {
+                const defaultByGender = gender === 'female'
+                    ? 'https://via.placeholder.com/120x120/ffc0cb/000000?text=Female'
+                    : 'https://via.placeholder.com/120x120/87cefa/000000?text=Male';
+                photoLeftEl.src = defaultByGender;
+            }
 
             // Message by score tiers (Critical, Moderate, Good, Excellent)
             let message = '';
@@ -423,7 +433,9 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     // Display uploaded photo as Photo1 (left photo)
-                    document.getElementById('photoLeft').src = e.target.result;
+                    const left = document.getElementById('photoLeft');
+                    left.src = e.target.result;
+                    left.setAttribute('data-user-uploaded', 'true');
                     
                     // Also update the upload area to show a preview
                     const uploadArea = document.querySelector('.photo-upload');
@@ -435,6 +447,17 @@
                 };
                 reader.readAsDataURL(file);
             }
+        });
+
+        document.getElementById('gender').addEventListener('change', function() {
+            const left = document.getElementById('photoLeft');
+            const uploaded = left.getAttribute('data-user-uploaded') === 'true';
+            if (uploaded) return;
+            const value = this.value;
+            const defaultByGender = value === 'female'
+                ? 'https://via.placeholder.com/120x120/ffc0cb/000000?text=Female'
+                : 'https://via.placeholder.com/120x120/87cefa/000000?text=Male';
+            left.src = defaultByGender;
         });
     </script>
 </body>
